@@ -77,7 +77,7 @@ class InputField extends Component {
     return (
 
       <form onSubmit={this.handleSubmit}>
-        <Grid columns={['3/4', '1/4']} pad='small' border='top' fill='horizontal' flex-direction='row' >
+        <Grid columns={['3/4', '1/4']} pad='small' border='top' fill='horizontal' flex-direction='row' style={{ zIndex: '1' }}>
         <TextInput
           id="text-input"
           name='writeMessage'
@@ -85,14 +85,10 @@ class InputField extends Component {
           value={this.state.value}
           onChange={this.handleInputChange}
           resize={false}
-          //icon={<Next />} reverse hoverIndicator onClick={() => this.handleSubmit}
           placeholder="write message..."
-          
         />
-
         <Button icon={<Next />} hoverIndicator type='submit' onClick={this.handleSubmit} />
         </Grid>
-        
       </form>
     )
   }
@@ -122,35 +118,22 @@ class UsersSidebar extends Component {
   }
 
   render() {
-    return(
-
-      
-        
-<div >
-<h3>users</h3>
-<h2>U1</h2>      
-
-</div>
+    return( 
+      <Box>      
+      <ul>
+      {this.state.users.map(user => (
+        <li>
+          USER: {user}
+        </li>
+      ))}
+    </ul>
+    </Box> 
       
     )
   }
 }
 
-const AppBar = (props) => (
-  <Box
-    tag='header'
-    direction='row'
-    align='center'
-    justify='between'
-    background='#8abaa0'
-    pad={{ left: 'medium', right: 'small', vertical: 'small' }}
-    elevation='small'
-    style={{ zIndex: '1' }}
-    {...props}
-  />
-);
-
-class App extends React.Component {
+class MessagesField extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -173,6 +156,37 @@ class App extends React.Component {
       });
   }
 
+  render() {
+    return(        
+      <ul>
+      {this.state.items.map(item => (
+        <li key={item.timestamp}>
+          USER: {item.user} | MESSAGE: {item.text}
+        </li>
+      ))}
+    </ul>
+      
+    )
+  }
+}
+
+
+const AppBar = (props) => (
+  <Box
+    tag='header'
+    direction='row'
+    align='center'
+    justify='between'
+    background='#8abaa0'
+    pad={{ left: 'medium', right: 'small', vertical: 'small' }}
+    elevation='small'
+    style={{ zIndex: '1' }}
+    {...props}
+  />
+);
+
+class App extends React.Component {
+/*
   Messages = (isLoaded) => {
     if (!isLoaded) {
       return <div> Loading... </div>
@@ -181,10 +195,10 @@ class App extends React.Component {
         <div> Data has been loaded </div>
       );
     }
-  }
+  }*/
 
   render() {
-    var { isLoaded, items, users } = this.state;
+   // var { isLoaded, items, users } = this.state;
 
     return (
       <Grommet theme={grommet} full>
@@ -220,22 +234,11 @@ class App extends React.Component {
             <Box direction='column' flex align='center' fill='vertical' justify='start' background='light-3'>
               <Box height='large'><h3> recent messages </h3></Box>
 
-              {
-                !isLoaded ?
-                <div> Loading... </div>
-                :
-                <ul>
-                  {items.map(item => (
-                    <li key={item.timestamp}>
-                      USER: {item.user} | MESSAGE: {item.text}
-                    </li>
-                  ))};
-                </ul>
-              }
-
+                <MessagesField/>
+            
               App Body
               <Box height='15%' fill='horizontal' direction='row' align='stretch' justify='between' background='light-1'>
-                  <InputField></InputField>
+                  <InputField/>
               </Box>
 
             </Box>
@@ -246,10 +249,7 @@ class App extends React.Component {
               align='center'
               justify='start'
             >
-              <UsersSidebar> 
-               
-                sidebar
-              </UsersSidebar>
+              <UsersSidebar /> 
             </Box>
           </Box>
         </Box>
