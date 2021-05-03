@@ -4,7 +4,6 @@ import './index.css';
 import { Avatar, Box, Button, Form, Formfield, Grid, grommet, Grommet, Heading, Nav, Sidebar, TextArea, TextInput } from 'grommet';
 import { Chat, Help, Next, Notification, StatusInfoSmall } from 'grommet-icons';
 import { render } from '@testing-library/react';
-import axios from 'axios'
 
 /*
 // If you want to start measuring performance in your app, pass a function
@@ -13,61 +12,15 @@ import axios from 'axios'
 reportWebVitals();
 */
 
-// API
-
-/*
-const url = 'https://608947d48c8043001757e674.mockapi.io/messages';
-const options = {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json;charset=UTF-8'
-  },
-  body: JSON.stringify({
-    a: 10,
-    b: 20
-  })
-};
-
-fetch(url, options)
-  .then(response => {
-    console.log(response.status);
-  });
-
-*/
-
-// FETCH MESSAGES
-
-// class GetMessagesFromAPI extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       items: [],
-//       isLoaded: false,
-//     }
-//   }
-
-//   componentDidMount() {
-//     fetch('https://608947d48c8043001757e674.mockapi.io/messages')
-//       .then(res => res.json())
-//       .then(json => {
-//         this.setState({
-//           isLoaded: true,
-//           items: json["messages"], // json.messages
-//         })
-//       });
-//   }
-// }
-
-
-
 // MESSAGE 
-
 class InputField extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      writeMessage: ""
+      writeMessage: "",
+      responseMessage: "",
+      isLoading: true,
+      error: ""
     }
   }
 
@@ -75,6 +28,7 @@ class InputField extends Component {
     event.preventDefault()
     const data = this.state
     console.log(data)
+    this.postData()
   }
 
   handleInputChange = (event) => {
@@ -86,31 +40,44 @@ class InputField extends Component {
   }
 
   postData() {
-    try {
-      let result = fetch('https://608947d48c8043001757e674.mockapi.io/message', {
-        method: 'post',
-        mode: 'no-cors',
-        headers: {
-          'Accept': 'application/json',
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          key1: 'user',
-          value: 'text'
+    var payload = JSON.stringify({
+      user: 'MyUser', // ToDo: should be set by server, not in frontend
+      text: this.state.writeMessage  // ToDo
+    });
+    fetch('https://608947d48c8043001757e674.mockapi.io/message', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: payload
+    })
+      .then(response => response.json())
+      .then(result => {
+        this.setState({
+          isLoading: false,
+          responseMessage: result.ok
+        });
+      },
+        (error) => {
+          this.setState({
+            isLoading: true,
+            error: error
+          });
+        })
+      .catch(err => {
+        console.log('err', err);
+        this.setState({
+          isLoading: true,
+          error: err
         })
       });
-
-      console.log('Result: ' + result)
-
-    } catch (e) {
-      console.log(e)
-    }
   }
 
   render() {
-    const { writeMessage } = this.state
     return (
+
       <form onSubmit={this.handleSubmit}>
+        <Grid columns={['3/4', '1/4']} pad='small' border='top' fill='horizontal' flex-direction='row' >
         <TextInput
           id="text-input"
           name='writeMessage'
@@ -118,112 +85,56 @@ class InputField extends Component {
           value={this.state.value}
           onChange={this.handleInputChange}
           resize={false}
-          icon={<Next />} reverse
+          //icon={<Next />} reverse hoverIndicator onClick={() => this.handleSubmit}
           placeholder="write message..."
+          
         />
 
-        <button type='submit' onClick={this.handleSubmit}>
-          send
-        </button>
-
-        <button onClick={() => this.postData()}>
-          PRESS ME
-        </button>
-
+        <Button icon={<Next />} hoverIndicator type='submit' onClick={this.handleSubmit} />
+        </Grid>
+        
       </form>
     )
   }
 }
 
-
-class PostForm extends Component {
+class UsersSidebar extends Component {
   constructor(props) {
-    super(props)
-
+    super(props);
     this.state = {
-      user: '',
-      message: '',
-      timestamp: ''
+      users: [],
+      areUsersLoaded: false,
     }
   }
 
-  changeHandler = (e) => {
-    this.setState({ [e.target.name]: e.target.value })
-  }
-
-  submitHandler = e => {
-    e.preventDefault()
-    console.log(this.state)
-    axios
-      .post('https://608947d48c8043001757e674.mockapi.io/message', this.state)
-      .then(response => {
-        console.log(response)
-      })
-      .catch(error => {
-        console.log(error)
-      })
+  // API
+  componentDidMount() {
+    fetch('https://608947d48c8043001757e674.mockapi.io/users')
+      .then(res => res.json())
+      .then(json => {
+        this.setState({
+          users: json.users,
+          areUsersLoaded: true,
+        })
+      }).catch((err) => {
+        console.log(err);
+      });
   }
 
   render() {
-    const { user, message, timestamp } = this.state
-    return (
-      <div>
-        <form onSubmit={this.submitHandler}>
-          <input type='text' name='user' value={user} onChange={this.changeHandler} />
-        </form>
-      </div>
-    );
+    return(
+
+      
+        
+<div >
+<h3>users</h3>
+<h2>U1</h2>      
+
+</div>
+      
+    )
   }
-
 }
-
-
-/*
-const SidebarHeader = () => (
-  <Avatar
-    align="center"
-    justify="evenly"
-    border={{ size: 'small', color: '#8abaa0' }}
-    background="white"
-    flex={false}
-  >
-    SY
-  </Avatar>
-);
-
-const SidebarFooter = () => (
-  <Nav gap="small">
-    <Button icon={<Chat />} />
-    <Button icon={<Help />} />
-  </Nav>
-);
-
-const MainNavigation = () => (
-  <Nav gap="small">
-    <Button icon={<StatusInfoSmall />} />
-    <Box pad="small" border={{ color: '#8abaa0', side: 'top' }} />
-    <Box gap="small" pad={{ vertical: 'medium' }}>
-      <Button icon={<Chat />} />
-      <Button icon={<Help />} />
-    </Box>
-  </Nav>
-);
-
-export const SidebarIcons = () => (
-  <Grommet theme={grommet} full>
-    <Box direction="row" height={{ min: '100%' }}>
-      <Sidebar
-        background="accent-1"
-        header={<SidebarHeader />}
-        footer={<SidebarFooter />}
-      >
-        <MainNavigation />
-      </Sidebar>
-    </Box>
-  </Grommet>
-);
-
-*/
 
 const AppBar = (props) => (
   <Box
@@ -245,7 +156,6 @@ class App extends React.Component {
     this.state = {
       items: [],
       isLoaded: false,
-      showSidebar: true,
     }
   }
 
@@ -263,19 +173,6 @@ class App extends React.Component {
       });
   }
 
-  /*
-  // SHOW MESSAGES
-  method Messages(props) {
-    if ( !isLoaded ) {
-      return <div> Loading... </div>
-    } else {
-        return (
-          <div> Data has been loaded </div>
-        );
-      }
-  }
-  */
-
   Messages = (isLoaded) => {
     if (!isLoaded) {
       return <div> Loading... </div>
@@ -287,70 +184,23 @@ class App extends React.Component {
   }
 
   render() {
-
-    var { isLoaded, items } = this.state;
-
-    if (!isLoaded) {
-      <div> Loading... </div>
-    }
-
-//    if (items != null) {
-      <ul>
-        {items.map(item => (
-          <li key={item.timestamp}>
-            USER: {item.user} | MESSAGE: {item.text}
-          </li>
-        ))};
-      </ul>
-//    }
-    // else {
-    //   <ul>      
-    //     <li>
-    //       Loading...
-    //     </li>
-    // </ul>
-    // }
-
-
-
-    // ToDo: put this in a method
-    //       parse data from response
-    //       present data as user messages on the site
-    // HTTP REQUEST USING fetch()
-
-    let myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-
-    var requestOptions = {
-      method: 'GET',
-      headers: myHeaders,
-      redirect: 'follow'
-    };
-
-    fetch("https://608947d48c8043001757e674.mockapi.io/messages", requestOptions)
-      .then(response => response.json())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
-    // END
-
+    var { isLoaded, items, users } = this.state;
 
     return (
       <Grommet theme={grommet} full>
         <Box fill>
           <AppBar>
-            <Heading level='3' size='medium' margin='none'>cool chat</Heading>
+            <Heading level='2' size='medium' margin='none'>a cool chat</Heading>
             <Button
               icon={<Notification />}
               onClick={() =>
                 this.setState({
                   showSidebar: !this.showSidebar,
-
-                  //this.setShowSidebar(!this.showSidebar);
                 })}
             />
           </AppBar>
-          <Box direction='row' flex overflow={{ horizontal: 'auto' }}>
-            <Sidebar background="white" round="none"
+          <Box direction='row' border='all' flex overflow={{ horizontal: 'auto' }}>
+            <Sidebar level='1' border='right' background="white" round="none"
               header={
                 <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
               }
@@ -360,43 +210,47 @@ class App extends React.Component {
             >
               <Box border={{ color: '#8abaa0', side: 'horizontal' }}>
                 <Nav gap="small">
-                  <Button icon={<StatusInfoSmall />} />
-                  <Button icon={<Chat />} />
-                  <Button icon={<Help />} />
+                  <Button icon={<StatusInfoSmall />} hoverIndicator />
+                  <Button icon={<Chat />} hoverIndicator />
+                  <Button icon={<Help />} hoverIndicator />
                 </Nav>
               </Box>
             </Sidebar>
 
+            <Box direction='column' flex align='center' fill='vertical' justify='start' background='light-3'>
+              <Box height='large'><h3> recent messages </h3></Box>
 
-            <Box direction='column' flex align='center' fill='vertical' justify='start' background='light-2'>
-              <Box height='large'> yo </Box>
-              <PostForm />
-
-
-
-               USER111: {items.user} | MESSAGE: {items.text}
-
+              {
+                !isLoaded ?
+                <div> Loading... </div>
+                :
+                <ul>
+                  {items.map(item => (
+                    <li key={item.timestamp}>
+                      USER: {item.user} | MESSAGE: {item.text}
+                    </li>
+                  ))};
+                </ul>
+              }
 
               App Body
               <Box height='15%' fill='horizontal' direction='row' align='stretch' justify='between' background='light-1'>
-                <Grid pad='small' border='top' fill='horizontal'>
                   <InputField></InputField>
-
-                </Grid>
               </Box>
 
             </Box>
 
             <Box
+              border='left'
               width='small'
               align='center'
-              justify='center'
+              justify='start'
             >
-              sidebar
-              </Box>
-
-
-
+              <UsersSidebar> 
+               
+                sidebar
+              </UsersSidebar>
+            </Box>
           </Box>
         </Box>
       </Grommet>
@@ -404,92 +258,7 @@ class App extends React.Component {
   }
 };
 
-
-
-//export default App;
-
-// ---------------------------
-/*
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
-
-class Board extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(9).fill(null),
-      xIsNext: true,
-    };
-  }
-
-  handleClick(i) {
-    const squares = this.state.squares.slice();
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
-    this.setState({
-      squares: squares,
-      xIsNext: !this.state.xIsNext,
-    });
-  }
-
-  renderSquare(i) {
-    return (
-      <Square
-        value={this.state.squares[i]}
-        onClick={() => this.handleClick(i)}
-      />
-    );
-  }
-
-  render() {
-    const status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-
-    return (
-      <div>
-        <div className="status">{status}</div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
-}
-
-class Game extends React.Component {
-  render() {
-    return (
-      <div className="game">
-        <div className="game-board">
-          <Board />
-        </div>
-        <div className="game-info">
-        </div>
-      </div>
-    );
-  }
-}
-
-
-*/
-
 // ========================================
-
 
 ReactDOM.render(
   <App />,
