@@ -4,6 +4,7 @@ import './index.css';
 import { Avatar, Box, Button, Form, Formfield, Grid, grommet, Grommet, Heading, Nav, Sidebar, TextArea, TextInput } from 'grommet';
 import { Chat, Help, Next, Notification, StatusInfoSmall } from 'grommet-icons';
 import { render } from '@testing-library/react';
+import axios from 'axios'
 
 /*
 // If you want to start measuring performance in your app, pass a function
@@ -12,51 +13,55 @@ import { render } from '@testing-library/react';
 reportWebVitals();
 */
 
-// MESSAGE 
+// API
+
 /*
-const InputMessage = props => {
-  //state = { text: '' }
-  const [state, setState] = useState({
-    value: '',
+const url = 'https://608947d48c8043001757e674.mockapi.io/messages';
+const options = {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8'
+  },
+  body: JSON.stringify({
+    a: 10,
+    b: 20
+  })
+};
+
+fetch(url, options)
+  .then(response => {
+    console.log(response.status);
   });
 
-  const onChange = event => {
-    const {
-      target: { value },
-    } = event;
-  }
+*/
 
-  const escapedText = value.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
-  const exp = new RegExp(escapedText, 'i');    
+// FETCH MESSAGES
 
-    return (
-      <Form 
-        onSubmit={({ value: nextValue }) => {
-        console.log(nextValue);
-        setState({ value: ''})
-        }}
-      >
-      
-      
-      
-       
-        <TextInput
-          id="text-input"
-          background='white'
-          value={this.state.value}
-          onChange={onChange}
-          //value={text}
-          //onChange={event => this.setState({ text: event.target.value })}
-          resize={false}
-          icon={<Next />} reverse 
-          placeholder="write message..."
-        />
+// class GetMessagesFromAPI extends Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       items: [],
+//       isLoaded: false,
+//     }
+//   }
 
-      </Form>
-      
-    );
-  } 
-}; */
+//   componentDidMount() {
+//     fetch('https://608947d48c8043001757e674.mockapi.io/messages')
+//       .then(res => res.json())
+//       .then(json => {
+//         this.setState({
+//           isLoaded: true,
+//           items: json["messages"], // json.messages
+//         })
+//       });
+//   }
+// }
+
+
+
+// MESSAGE 
 
 class InputField extends Component {
   constructor(props) {
@@ -80,8 +85,30 @@ class InputField extends Component {
     })
   }
 
+  postData() {
+    try {
+      let result = fetch('https://608947d48c8043001757e674.mockapi.io/message', {
+        method: 'post',
+        mode: 'no-cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          key1: 'user',
+          value: 'text'
+        })
+      });
+
+      console.log('Result: ' + result)
+
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   render() {
-    const {writeMessage} = this.state
+    const { writeMessage } = this.state
     return (
       <form onSubmit={this.handleSubmit}>
         <TextInput
@@ -91,17 +118,67 @@ class InputField extends Component {
           value={this.state.value}
           onChange={this.handleInputChange}
           resize={false}
-          icon={<Next />} reverse 
+          icon={<Next />} reverse
           placeholder="write message..."
         />
-        <button>send</button>
+
+        <button type='submit' onClick={this.handleSubmit}>
+          send
+        </button>
+
+        <button onClick={() => this.postData()}>
+          PRESS ME
+        </button>
+
       </form>
     )
   }
+}
 
+
+class PostForm extends Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      user: '',
+      message: '',
+      timestamp: ''
+    }
+  }
+
+  changeHandler = (e) => {
+    this.setState({ [e.target.name]: e.target.value })
+  }
+
+  submitHandler = e => {
+    e.preventDefault()
+    console.log(this.state)
+    axios
+      .post('https://608947d48c8043001757e674.mockapi.io/message', this.state)
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  render() {
+    const { user, message, timestamp } = this.state
+    return (
+      <div>
+        <form onSubmit={this.submitHandler}>
+          <input type='text' name='user' value={user} onChange={this.changeHandler} />
+        </form>
+      </div>
+    );
+  }
 
 }
 
+
+/*
 const SidebarHeader = () => (
   <Avatar
     align="center"
@@ -146,6 +223,8 @@ export const SidebarIcons = () => (
   </Grommet>
 );
 
+*/
+
 const AppBar = (props) => (
   <Box
     tag='header'
@@ -164,47 +243,110 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      items: [],
+      isLoaded: false,
       showSidebar: true,
-      //setShowSidebar: true,
     }
   }
 
+  // API
+  componentDidMount() {
+    fetch('https://608947d48c8043001757e674.mockapi.io/messages')
+      .then(res => res.json())
+      .then(json => {
+        this.setState({
+          items: json.messages,
+          isLoaded: true,
+        })
+      }).catch((err) => {
+        console.log(err);
+      });
+  }
+
+  /*
+  // SHOW MESSAGES
+  method Messages(props) {
+    if ( !isLoaded ) {
+      return <div> Loading... </div>
+    } else {
+        return (
+          <div> Data has been loaded </div>
+        );
+      }
+  }
+  */
+
+  Messages = (isLoaded) => {
+    if (!isLoaded) {
+      return <div> Loading... </div>
+    } else {
+      return (
+        <div> Data has been loaded </div>
+      );
+    }
+  }
 
   render() {
-    //const [showSidebar, setShowSidebar] = useState(false);
-    
+
+    var { isLoaded, items } = this.state;
+
+    if (!isLoaded) {
+      <div> Loading... </div>
+    }
+
+//    if (items != null) {
+      <ul>
+        {items.map(item => (
+          <li key={item.timestamp}>
+            USER: {item.user} | MESSAGE: {item.text}
+          </li>
+        ))};
+      </ul>
+//    }
+    // else {
+    //   <ul>      
+    //     <li>
+    //       Loading...
+    //     </li>
+    // </ul>
+    // }
+
+
+
     // ToDo: put this in a method
     //       parse data from response
     //       present data as user messages on the site
     // HTTP REQUEST USING fetch()
+
     let myHeaders = new Headers();
     myHeaders.append("Accept", "application/json");
-    
+
     var requestOptions = {
       method: 'GET',
       headers: myHeaders,
       redirect: 'follow'
     };
-    
+
     fetch("https://608947d48c8043001757e674.mockapi.io/messages", requestOptions)
       .then(response => response.json())
       .then(result => console.log(result))
       .catch(error => console.log('error', error));
     // END
 
+
     return (
       <Grommet theme={grommet} full>
         <Box fill>
           <AppBar>
             <Heading level='3' size='medium' margin='none'>cool chat</Heading>
-            <Button 
-              icon={<Notification />} 
-              onClick={() => 
+            <Button
+              icon={<Notification />}
+              onClick={() =>
                 this.setState({
                   showSidebar: !this.showSidebar,
-              
-                //this.setShowSidebar(!this.showSidebar);
-              })}
+
+                  //this.setShowSidebar(!this.showSidebar);
+                })}
             />
           </AppBar>
           <Box direction='row' flex overflow={{ horizontal: 'auto' }}>
@@ -216,38 +358,45 @@ class App extends React.Component {
                 <Button icon={<Help />} hoverIndicator />
               }
             >
-              <Box border={{ color:  '#8abaa0', side: 'horizontal' }}>
+              <Box border={{ color: '#8abaa0', side: 'horizontal' }}>
                 <Nav gap="small">
                   <Button icon={<StatusInfoSmall />} />
-                    <Button icon={<Chat />} />
-                    <Button icon={<Help />} />
+                  <Button icon={<Chat />} />
+                  <Button icon={<Help />} />
                 </Nav>
               </Box>
             </Sidebar>
-            
-            
+
+
             <Box direction='column' flex align='center' fill='vertical' justify='start' background='light-2'>
               <Box height='large'> yo </Box>
+              <PostForm />
+
+
+
+               USER111: {items.user} | MESSAGE: {items.text}
+
+
               App Body
               <Box height='15%' fill='horizontal' direction='row' align='stretch' justify='between' background='light-1'>
                 <Grid pad='small' border='top' fill='horizontal'>
                   <InputField></InputField>
-                  
+
                 </Grid>
               </Box>
-             
+
             </Box>
 
-              <Box 
-                width='small'
-                align='center'
-                justify='center'
-              >
-                sidebar
+            <Box
+              width='small'
+              align='center'
+              justify='center'
+            >
+              sidebar
               </Box>
 
-            
-                       
+
+
           </Box>
         </Box>
       </Grommet>
