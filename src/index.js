@@ -1,9 +1,10 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import { Avatar, Box, Button, Form, Formfield, Grid, grommet, Grommet, Heading, Nav, Sidebar, TextArea, TextInput } from 'grommet';
-import { Chat, Help, Next, Notification, StatusInfoSmall } from 'grommet-icons';
+import { Avatar, Box, Button, Form, Formfield, Grid, grommet, Grommet, Heading, Image, List, Nav, Sidebar, TextArea, TextInput } from 'grommet';
+import { Chat, Github, Help, Menu, Next, Notification, Phone, Plan } from 'grommet-icons';
 import { render } from '@testing-library/react';
+import Logo from "./logo.png"
 
 /*
 // If you want to start measuring performance in your app, pass a function
@@ -75,10 +76,9 @@ class InputField extends Component {
 
   render() {
     return (
-
       <form onSubmit={this.handleSubmit}>
-        <Grid columns={['3/4', '1/4']} pad='small' border='top' fill='horizontal' flex-direction='row' style={{ zIndex: '1' }}>
-        <TextInput
+        <Box direction='row' pad='15' margin='small' gap='small'>
+          <TextInput
           id="text-input"
           name='writeMessage'
           background='white'
@@ -86,13 +86,19 @@ class InputField extends Component {
           onChange={this.handleInputChange}
           resize={false}
           placeholder="write message..."
-        />
-        <Button icon={<Next />} hoverIndicator type='submit' onClick={this.handleSubmit} />
-        </Grid>
+          />
+          <Button icon={<Next />} hoverIndicator type='submit' onClick={this.handleSubmit} />
+        </Box>
       </form>
     )
   }
 }
+
+const Input = () => (
+<Box border='top'>
+  <InputField />
+</Box>
+)
 
 class UsersSidebar extends Component {
   constructor(props) {
@@ -118,20 +124,22 @@ class UsersSidebar extends Component {
   }
 
   render() {
-    return( 
-      <Box>      
-      <ul>
-      {this.state.users.map(user => (
-        <li>
-          USER: {user}
-        </li>
-      ))}
-    </ul>
-    </Box> 
-      
+    return(     
+      <Box pad='small'>
+      <List
+        data={this.state.users.slice()}
+      /> 
+      </Box>    
     )
   }
 }
+
+const RightSidebar = () => (
+    <Box width='small' align='center' justify='start'>
+      <Heading level='3' color='#8abaa0'>users</Heading>
+      <UsersSidebar />
+    </Box>
+)
 
 class MessagesField extends Component {
   constructor(props) {
@@ -157,100 +165,86 @@ class MessagesField extends Component {
   }
 
   render() {
-    return(        
+
+    const abcd = ['a', 'b']
+    return( 
+      <Box pad='small'>
+      <List
+        data={this.state.items.slice()}
+        primaryKey='abcd'
+      /> 
+
+      
+      
       <ul>
       {this.state.items.map(item => (
         <li key={item.timestamp}>
           USER: {item.user} | MESSAGE: {item.text}
         </li>
       ))}
-    </ul>
-      
+      </ul>
+      </Box>
     )
   }
 }
 
+const RecentMessages = () => (
+    <Box direction='column' align='center' justify='start' background='light-3' border='vertical'>
+      <Box height='large'>
+        <Heading level='3' color='#8abaa0'> recent messages </Heading>
+      </Box>
+      <MessagesField />
+    </Box>
+)
 
 const AppBar = (props) => (
-  <Box
-    tag='header'
-    direction='row'
-    align='center'
-    justify='between'
-    background='#8abaa0'
-    pad={{ left: 'medium', right: 'small', vertical: 'small' }}
-    elevation='small'
-    style={{ zIndex: '1' }}
-    {...props}
-  />
+    <Box
+      tag='header'
+      direction='row'
+      align='center'
+      justify='between'
+      background="linear-gradient(102.77deg, #8aafba -9.18%, #8abaa0 209.09%)"
+      pad={{ left: 'medium', right: 'small', vertical: 'small' }}
+      {...props}
+    >
+      <Image src={Logo} alt='a cool chat logo' />
+      <Button icon={<Menu color='white' />} hoverIndicator/>
+    </Box>
 );
 
+const LeftSidebar = () => (
+    <Box direction='column' pad='small' gap='small'>
+      <Box>
+        <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
+      </Box>
+      <Box flex='1' border={{ color: '#8abaa0', side: 'horizontal' }}>
+        <Nav gap="small">
+          <Button icon={<Notification />} hoverIndicator />
+          <Button icon={<Chat />} hoverIndicator />
+          <Button icon={<Phone />} hoverIndicator />
+          <Button icon={<Plan />} hoverIndicator />
+          <Button icon={<Github />} hoverIndicator />
+          <Button icon={<Help />} hoverIndicator />
+        </Nav>
+      </Box>
+    </Box>
+)
+
 class App extends React.Component {
-/*
-  Messages = (isLoaded) => {
-    if (!isLoaded) {
-      return <div> Loading... </div>
-    } else {
-      return (
-        <div> Data has been loaded </div>
-      );
-    }
-  }*/
 
   render() {
-   // var { isLoaded, items, users } = this.state;
 
     return (
       <Grommet theme={grommet} full>
-        <Box fill>
-          <AppBar>
-            <Heading level='2' size='medium' margin='none'>a cool chat</Heading>
-            <Button
-              icon={<Notification />}
-              onClick={() =>
-                this.setState({
-                  showSidebar: !this.showSidebar,
-                })}
-            />
-          </AppBar>
-          <Box direction='row' border='all' flex overflow={{ horizontal: 'auto' }}>
-            <Sidebar level='1' border='right' background="white" round="none"
-              header={
-                <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
-              }
-              footer={
-                <Button icon={<Help />} hoverIndicator />
-              }
-            >
-              <Box border={{ color: '#8abaa0', side: 'horizontal' }}>
-                <Nav gap="small">
-                  <Button icon={<StatusInfoSmall />} hoverIndicator />
-                  <Button icon={<Chat />} hoverIndicator />
-                  <Button icon={<Help />} hoverIndicator />
-                </Nav>
-              </Box>
-            </Sidebar>
-
-            <Box direction='column' flex align='center' fill='vertical' justify='start' background='light-3'>
-              <Box height='large'><h3> recent messages </h3></Box>
-
-                <MessagesField/>
-            
-              App Body
-              <Box height='15%' fill='horizontal' direction='row' align='stretch' justify='between' background='light-1'>
-                  <InputField/>
-              </Box>
-
-            </Box>
-
-            <Box
-              border='left'
-              width='small'
-              align='center'
-              justify='start'
-            >
-              <UsersSidebar /> 
-            </Box>
+        <AppBar />
+        <Box direction='row' basis='auto' fill='true' justify='stretch' >
+          <LeftSidebar />
+            <Box direction='column' fill='true' flex='1'>
+            <RecentMessages />
+            <Input />
+          </Box>
+          <Box fill='vertical' flex='1'>
+            <RightSidebar />
           </Box>
         </Box>
       </Grommet>
